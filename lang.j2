@@ -1,0 +1,48 @@
+{% from "_partials/cards.j2" import render_post_card %}
+{% include "./_partials/config.j2" %}
+
+{% set locale = page.topic.locale if page.topic and page.topic.locale else (page.topic.lang if page.topic else site.primary_lang) %}
+
+{% block lang %}{{ locale }}{% endblock %}
+{% block title %}{{ site.name }}{% if tagline %} · {{ tagline }}{% endif %}{% endblock %}
+
+{% block style %}
+  {% include "./_partials/styles.j2" %}
+{% endblock %}
+
+{% block body %}
+  {% include "./_partials/shell_start.j2" %}
+
+  <div class="container">
+    <div class="masthead-bar reveal">
+      <span><span class="masthead-bar__red">LANG</span></span>
+      <span>{{ locale }}</span>
+      <span>{{ brand_mark }}</span>
+    </div>
+
+    <header class="page-header">
+      <h1 class="page-header__title display">{{ site.name }}</h1>
+      {% if site.summary %}
+        <p class="page-header__desc">{{ site.summary }}</p>
+      {% endif %}
+    </header>
+
+    {% set items = page.items or [] %}
+    {% if items %}
+      <div class="post-grid post-grid--uniform">
+        {% for post in items %}
+          {{ render_post_card(post, 'plain', loop.index) }}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">暂无内容</div>
+    {% endif %}
+  </div>
+
+  {% include "./_partials/shell_end.j2" %}
+  {% include "_snippets/brand_foot.j2" %}
+{% endblock %}
+
+{% block script %}
+  <script src="{{ static_url }}js/main.js" defer></script>
+{% endblock %}

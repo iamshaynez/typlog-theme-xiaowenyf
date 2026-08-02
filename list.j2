@@ -1,0 +1,110 @@
+{% from "_partials/cards.j2" import render_post_card %}
+{% include "./_partials/config.j2" %}
+
+{% block title %}{{ page.title }} · {{ site.name }}{% endblock %}
+
+{% if page.type == 'tag' and page.topic and page.topic.lang %}
+{% block lang %}{{ page.topic.lang }}{% endblock %}
+{% endif %}
+
+{% block style %}
+  {% include "./_partials/styles.j2" %}
+{% endblock %}
+
+{% block body %}
+  {% include "./_partials/shell_start.j2" %}
+
+  <div class="container">
+    <header class="page-header">
+      <div class="masthead-bar">
+        {% if page.type == 'tag' %}
+          <span><span class="masthead-bar__red">TAG</span></span>
+        {% elif page.type == 'author' %}
+          <span><span class="masthead-bar__red">AUTHOR</span></span>
+        {% elif page.type == 'audio_list' %}
+          <span><span class="masthead-bar__red">PODCAST</span></span>
+        {% else %}
+          <span><span class="masthead-bar__red">LIST</span></span>
+        {% endif %}
+        <span>
+          {% if page.type == 'tag' and page.topic %}
+            {{ page.topic.slug or 'tag' }}
+          {% elif page.type == 'author' and page.topic %}
+            {{ page.topic.username or 'author' }}
+          {% else %}
+            archive
+          {% endif %}
+        </span>
+        <span>{{ page.items|length if page.items else 0 }} 篇</span>
+      </div>
+
+      <h1 class="page-header__title display">{{ page.title }}</h1>
+
+      {% if page.topic and page.topic.summary %}
+        <p class="page-header__desc">{{ page.topic.summary }}</p>
+      {% elif page.topic and page.topic.bio %}
+        <div class="page-header__desc">{{ page.topic.bio|safe }}</div>
+      {% elif page.type == 'audio_list' and site.podcast %}
+        <p class="page-header__desc">{{ site.podcast.description or site.podcast.subtitle or '' }}</p>
+      {% endif %}
+
+      {% if page.type == 'tag' %}
+        <ul class="tag-list" style="margin-top: var(--space-5);">
+          {% for tag in query.tags() %}
+            <li>
+              <a class="tag{% if page.topic and tag.id == page.topic.id %} is-active{% endif %}"
+                 href="{{ linkify(tag.url) }}">{{ tag.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </header>
+
+    {% set items = page.items or [] %}
+    {% if page.type == 'tag' and items %}
+      {% set items = items|reverse %}
+    {% endif %}
+
+    {% if items %}
+      {% if page.type in ('tag', 'author') %}
+        <div class="post-list">
+          {% for post in items %}
+            {{ render_post_card(post, 'list', loop.index) }}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="post-grid post-grid--uniform">
+          {% for post in items %}
+            {{ render_post_card(post, 'plain', loop.index) }}
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state">暂无内容</div>
+    {% endif %}
+
+    {# 年份翻页 #}
+    {% if page.prev_url or page.next_url %}
+      <nav class="year-nav" aria-label="年份导航">
+        {% if page.prev_url %}
+          <a href="{{ linkify(page.prev_url) }}" rel="prev">← {{ page.prev_year }}</a>
+        {% else %}
+          <span style="opacity:.35">←</span>
+        {% endif %}
+        <span class="year-nav__current">{{ page.title }}</span>
+        {% if page.next_url %}
+          <a href="{{ linkify(page.next_url) }}" rel="next">{{ page.next_year }} →</a>
+        {% else %}
+          <span style="opacity:.35">→</span>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </div>
+
+  {% include "./_partials/shell_end.j2" %}
+  {% include "_snippets/brand_foot.j2" %}
+{% endblock %}
+
+{% block script %}
+  <script src="{{ static_url }}js/main.js" defer></script>
+{% endblock %}

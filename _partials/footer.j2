@@ -1,0 +1,57 @@
+{% from "macros.j2" import render_social_icons %}
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__top">
+      <div>
+        <div class="site-footer__brand">{{ site.name }}</div>
+        <p class="site-footer__desc">{{ footer_desc }}</p>
+      </div>
+
+      <div>
+        <div class="site-footer__col-title">导航</div>
+        <ul class="site-footer__links">
+          <li><a href="{{ linkify('/') }}">首页</a></li>
+          {% if site.primary_links %}
+            {% for link in site.primary_links %}
+              <li>
+                <a href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                  {{ link.title }}
+                </a>
+              </li>
+            {% endfor %}
+          {% elif archive_url %}
+            <li><a href="{{ linkify(archive_url) }}">文章</a></li>
+          {% endif %}
+          {% if site.secondary_links %}
+            {% for link in site.secondary_links %}
+              <li>
+                <a href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                  {{ link.title }}
+                </a>
+              </li>
+            {% endfor %}
+          {% endif %}
+        </ul>
+      </div>
+
+      <div>
+        <div class="site-footer__col-title">社交</div>
+        <ul class="site-footer__links">
+          <li class="site-footer__socials">{{ render_social_icons(site) }}</li>
+          <li><a href="{{ linkify('/feed.xml') }}">RSS</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="site-footer__bottom">
+      <span>
+        © {{ site.name }}
+        {% if site.license %} · {{ site.license }}{% endif %}
+      </span>
+      <span>
+        以 <span class="site-footer__red">冷漆红</span> 点睛 · 玄墨主题
+      </span>
+    </div>
+  </div>
+</footer>

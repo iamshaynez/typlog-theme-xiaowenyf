@@ -1,0 +1,11 @@
+{# 主题配置：PRO 站点可在 assets 中放 _config/xiaowenyf JSON #}
+{% set conf = query.config('xiaowenyf') %}
+{% set brand_mark = (conf.brand_mark if conf and conf.brand_mark else none) or (site.name[0] if site.name else '墨') %}
+{% set tagline = (conf.tagline if conf and conf.tagline else none) or site.summary or '中文杂志感 · 冷灰与玄墨' %}
+{% set hero_eyebrow = (conf.hero_eyebrow if conf and conf.hero_eyebrow else none) or '本期开篇' %}
+{% set hero_title = (conf.hero_title if conf and conf.hero_title else none) or '以留白<br>丈量文字' %}
+{% set hero_lead = (conf.hero_lead if conf and conf.hero_lead else none) or site.summary or '冷灰为纸，玄黑为墨，冷漆红只作点睛。一部写给中文阅读的杂志风主题。' %}
+{% set footer_desc = (conf.footer_desc if conf and conf.footer_desc else none) or site.summary or '以杂志的版式重新想象博客：强反差字号、克制的红色点睛、每一次点击都有回应。' %}
+{% set quote_text = (conf.quote_text if conf and conf.quote_text else none) or '好的版式不抢戏，却让每一行字都站得更稳。' %}
+{% set quote_cite = (conf.quote_cite if conf and conf.quote_cite else none) or '玄墨 · 设计手记' %}
+{% set archive_url = site.posts_url or site.list_url or '/archive/' %}

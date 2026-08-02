@@ -1,0 +1,158 @@
+{% from "macros.j2" import render_subject_content, render_subject_visibility, render_subject_authors, render_subject_license, render_review_subject %}
+{% include "./_partials/config.j2" %}
+
+{% block title %}{{ page.title }} · {{ site.name }}{% endblock %}
+
+{% if page.lang %}
+{% block lang %}{{ page.lang }}{% endblock %}
+{% endif %}
+
+{% block style %}
+  {% include "./_partials/styles.j2" %}
+{% endblock %}
+
+{% block body %}
+  {% include "./_partials/shell_start.j2" %}
+
+  <article class="container article h-entry" itemscope itemtype="http://schema.org/Article">
+    <header class="article__header">
+      <div class="article__eyebrow">
+        <span class="hero__eyebrow-line" aria-hidden="true"></span>
+        {% if page.tags and page.tags|length > 0 %}
+          <span class="section-index">
+            <a href="{{ linkify(page.tags[0].url) }}" style="color:inherit">{{ page.tags[0].title }}</a>
+          </span>
+        {% elif page.type == 'audio' %}
+          <span class="section-index">播客</span>
+        {% elif page.type == 'page' %}
+          <span class="section-index">页面</span>
+        {% else %}
+          <span class="section-index">文章</span>
+        {% endif %}
+      </div>
+
+      <h1 class="article__title p-name" itemprop="headline">{{ page.title }}</h1>
+
+      {% if page.subtitle %}
+        <p class="article__lead lead p-summary">{{ page.subtitle }}</p>
+      {% endif %}
+
+      <div class="article__meta-row meta">
+        {% if page.published_at %}
+          <time class="dt-published" datetime="{{ page.published_at|xmldatetime }}" itemprop="datePublished">
+            {{ page.published_at.strftime('%Y.%m.%d') }}
+          </time>
+        {% endif %}
+        {% if page.authors and page.authors|length > 0 %}
+          <span class="dot" aria-hidden="true"></span>
+          <span>
+            {% for author in page.authors %}
+              <a href="{{ linkify(author.url) }}" class="p-author">{{ author.name }}</a>{% if not loop.last %}、{% endif %}
+            {% endfor %}
+          </span>
+        {% endif %}
+        {% if page.type == 'audio' and page.duration %}
+          <span class="dot" aria-hidden="true"></span>
+          <span>{{ page.duration }}</span>
+        {% endif %}
+        {% if page.visibility and page.visibility != 'public' %}
+          <span class="dot" aria-hidden="true"></span>
+          <span>{{ '会员' if page.visibility == 'member' else '加密' }}</span>
+        {% endif %}
+      </div>
+    </header>
+
+    {% if page.cover and page.cover.src %}
+      <figure class="reveal" style="margin-bottom: var(--space-7);">
+        <img src="{{ page.cover.src|thumbnail('l') }}" alt="{{ page.title }}" style="width:100%;border-radius:var(--radius);">
+      </figure>
+    {% elif page.type == 'audio' and page.image %}
+      <figure class="reveal" style="margin-bottom: var(--space-7);">
+        <img src="{{ page.image|thumbnail('l') }}" alt="{{ page.title }}" style="width:100%;border-radius:var(--radius);max-width:20rem;">
+      </figure>
+    {% endif %}
+
+    {% if page.type == 'audio' and page.audio %}
+      <div class="article__audio reveal">
+        <div class="section-index" style="margin-bottom: var(--space-3);">
+          {% if page.season %}S{{ page.season }}{% endif %}{% if page.episode %} · E{{ page.episode }}{% endif %}
+        </div>
+        <div style="font-family:var(--font-serif);font-weight:700;font-size:1.125rem;">{{ page.title }}</div>
+        <audio controls preload="none" src="{{ page.audio.src }}">
+          您的浏览器不支持音频播放。
+        </audio>
+      </div>
+    {% endif %}
+
+    {{ render_subject_visibility(site, page) }}
+
+    {% if page.review %}
+      {{ render_review_subject(page.review) }}
+    {% endif %}
+
+    <div class="article__body prose e-content js-content" itemprop="articleBody">
+      {{ render_subject_content(site, page) }}
+    </div>
+
+    <footer class="article__footer">
+      {% if page.license %}
+        <div style="margin-bottom: var(--space-5);">
+          {{ render_subject_license(site, page) }}
+        </div>
+      {% endif %}
+
+      {% if page.tags and page.tags|length > 0 %}
+        <ul class="tag-list">
+          {% for tag in page.tags %}
+            <li>
+              <a class="tag p-category" href="{{ linkify(tag.url) }}">{{ tag.title }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% if page.authors and page.authors|length > 0 %}
+        <div style="margin-top: var(--space-5);">
+          {{ render_subject_authors(site, page) }}
+        </div>
+      {% endif %}
+
+      {% if page.type in ('post', 'audio') %}
+        <div class="article__actions" style="margin-top: var(--space-6); display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:center;">
+          {% include "_snippets/subject_share.j2" %}
+        </div>
+      {% endif %}
+
+      {# 上一篇 / 下一篇 #}
+      {% set prev_item = query.previous_subject(page) %}
+      {% set next_item = query.next_subject(page) %}
+      {% if prev_item or next_item %}
+        <nav class="post-nav" aria-label="文章导航">
+          {% if prev_item %}
+            <a class="nav-card" href="{{ linkify(prev_item.url) }}">
+              <span class="nav-card__label">← 上一篇</span>
+              <span class="nav-card__title">{{ prev_item.title }}</span>
+            </a>
+          {% else %}
+            <div></div>
+          {% endif %}
+          {% if next_item %}
+            <a class="nav-card nav-card--next" href="{{ linkify(next_item.url) }}">
+              <span class="nav-card__label">下一篇 →</span>
+              <span class="nav-card__title">{{ next_item.title }}</span>
+            </a>
+          {% endif %}
+        </nav>
+      {% endif %}
+
+      {% include "_snippets/subject_foot.j2" %}
+    </footer>
+  </article>
+
+  {% include "./_partials/shell_end.j2" %}
+  {% include "_snippets/brand_foot.j2" %}
+{% endblock %}
+
+{% block script %}
+  <script src="{{ static_url }}js/main.js" defer></script>
+{% endblock %}

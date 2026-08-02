@@ -1,0 +1,110 @@
+{% from "_partials/cards.j2" import render_post_card %}
+{% include "./_partials/config.j2" %}
+
+{% block title %}{{ site.name }}{% if tagline %} · {{ tagline }}{% endif %}{% endblock %}
+
+{% block style %}
+  {% include "./_partials/styles.j2" %}
+{% endblock %}
+
+{% block body %}
+  {% include "./_partials/shell_start.j2" %}
+
+  <div class="container">
+    {# —— 刊头 —— #}
+    <div class="masthead-bar reveal">
+      <span><span class="masthead-bar__red">VOL.</span> 玄墨</span>
+      <span>{{ tagline }}</span>
+      <span>{{ brand_mark }}</span>
+    </div>
+
+    {# —— 英雄区 —— #}
+    <section class="hero">
+      <div>
+        <div class="hero__eyebrow">
+          <span class="hero__eyebrow-line" aria-hidden="true"></span>
+          <span class="section-index">{{ hero_eyebrow }}</span>
+        </div>
+        <h1 class="hero__title display">{{ hero_title|safe }}</h1>
+        <p class="hero__lead lead">{{ hero_lead }}</p>
+        <div class="hero__meta">
+          {% if archive_url %}
+            <a class="btn" href="{{ linkify(archive_url) }}">
+              阅读文章
+              <span class="btn__arrow" aria-hidden="true">→</span>
+            </a>
+          {% endif %}
+          {% if features.subscriber %}
+            <button type="button" class="btn btn--ghost js-subscribe">订阅本刊</button>
+          {% elif site.primary_links and site.primary_links|length > 0 %}
+            <a class="btn btn--ghost" href="{{ site.primary_links[0].url }}">{{ site.primary_links[0].title }}</a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    {# —— 文章网格 —— #}
+    {% set posts = query.latest_subjects('post', 12, contains=['tags']) %}
+    {% if not posts %}
+      {% set posts = query.latest_subjects(count=12, contains=['tags']) %}
+    {% endif %}
+
+    {% if posts %}
+      <section>
+        <div class="section-head reveal">
+          <div class="section-head__title">
+            <span class="section-index">01</span>
+            <h2>目录</h2>
+          </div>
+          {% if archive_url %}
+            <a class="section-head__more" href="{{ linkify(archive_url) }}">
+              全部文章 <span aria-hidden="true">→</span>
+            </a>
+          {% endif %}
+        </div>
+
+        <div class="post-grid">
+          {% for post in posts %}
+            {% if loop.index <= 6 %}
+              {{ render_post_card(post, 'featured' if loop.first else 'plain', loop.index) }}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    {% else %}
+      <div class="empty-state">暂无文章</div>
+    {% endif %}
+
+    {# —— 金句板 —— #}
+    <aside class="quote-panel reveal" style="margin-top: var(--space-9);">
+      <p class="quote-panel__text">{{ quote_text }}</p>
+      <cite class="quote-panel__cite">{{ quote_cite }}</cite>
+    </aside>
+
+    {# —— 续刊列表 —— #}
+    {% if posts and posts|length > 6 %}
+      <section style="margin-top: var(--space-9);">
+        <div class="section-head reveal">
+          <div class="section-head__title">
+            <span class="section-index">02</span>
+            <h2>续刊</h2>
+          </div>
+        </div>
+        <div class="post-list">
+          {% for post in posts %}
+            {% if loop.index > 6 and loop.index <= 12 %}
+              {{ render_post_card(post, 'list', loop.index) }}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+
+  {% include "./_partials/shell_end.j2" %}
+  {% include "_snippets/brand_foot.j2" %}
+{% endblock %}
+
+{% block script %}
+  <script src="{{ static_url }}js/main.js" defer></script>
+{% endblock %}
