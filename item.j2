@@ -1,11 +1,9 @@
-{% from "macros.j2" import render_subject_content, render_subject_visibility, render_subject_authors, render_subject_license, render_review_subject %}
+{% from "macros.j2" import render_subject_content %}
 {% include "./_partials/config.j2" %}
 
 {% block title %}{{ page.title }} · {{ site.name }}{% endblock %}
 
-{% if page.lang %}
-{% block lang %}{{ page.lang }}{% endblock %}
-{% endif %}
+{% block lang %}{{ page.lang or site.primary_lang or '' }}{% endblock %}
 
 {% block style %}
   {% include "./_partials/styles.j2" %}
@@ -55,10 +53,6 @@
           <span class="dot" aria-hidden="true"></span>
           <span>{{ page.duration }}</span>
         {% endif %}
-        {% if page.visibility and page.visibility != 'public' %}
-          <span class="dot" aria-hidden="true"></span>
-          <span>{{ '会员' if page.visibility == 'member' else '加密' }}</span>
-        {% endif %}
       </div>
     </header>
 
@@ -72,7 +66,7 @@
       </figure>
     {% endif %}
 
-    {% if page.type == 'audio' and page.audio %}
+    {% if page.type == 'audio' and page.audio and page.audio.src %}
       <div class="article__audio reveal">
         <div class="section-index" style="margin-bottom: var(--space-3);">
           {% if page.season %}S{{ page.season }}{% endif %}{% if page.episode %} · E{{ page.episode }}{% endif %}
@@ -84,23 +78,11 @@
       </div>
     {% endif %}
 
-    {{ render_subject_visibility(site, page) }}
-
-    {% if page.review %}
-      {{ render_review_subject(page.review) }}
-    {% endif %}
-
     <div class="article__body prose e-content js-content" itemprop="articleBody">
       {{ render_subject_content(site, page) }}
     </div>
 
     <footer class="article__footer">
-      {% if page.license %}
-        <div style="margin-bottom: var(--space-5);">
-          {{ render_subject_license(site, page) }}
-        </div>
-      {% endif %}
-
       {% if page.tags and page.tags|length > 0 %}
         <ul class="tag-list">
           {% for tag in page.tags %}
@@ -111,34 +93,29 @@
         </ul>
       {% endif %}
 
-      {% if page.authors and page.authors|length > 0 %}
-        <div style="margin-top: var(--space-5);">
-          {{ render_subject_authors(site, page) }}
-        </div>
-      {% endif %}
-
-      {% if page.type in ('post', 'audio') %}
-        <div class="article__actions" style="margin-top: var(--space-6); display:flex; flex-wrap:wrap; gap: var(--space-3); align-items:center;">
+      {% if page.type == 'post' or page.type == 'audio' %}
+        <div class="article__actions" style="margin-top: var(--space-6);">
           {% include "_snippets/subject_share.j2" %}
         </div>
       {% endif %}
 
-      {% set prev_item = query.previous_subject(page) %}
-      {% set next_item = query.next_subject(page) %}
-      {% if prev_item or next_item %}
+      {# 上下篇：用 subjects 列表更稳妥 #}
+      {% set prev_items = query.previous_subjects(page, 1) %}
+      {% set next_items = query.next_subjects(page, 1) %}
+      {% if prev_items or next_items %}
         <nav class="post-nav" aria-label="文章导航">
-          {% if prev_item %}
-            <a class="nav-card" href="{{ linkify(prev_item.url) }}">
+          {% if prev_items and prev_items|length > 0 %}
+            <a class="nav-card" href="{{ linkify(prev_items[0].url) }}">
               <span class="nav-card__label">← 上一篇</span>
-              <span class="nav-card__title">{{ prev_item.title }}</span>
+              <span class="nav-card__title">{{ prev_items[0].title }}</span>
             </a>
           {% else %}
             <div></div>
           {% endif %}
-          {% if next_item %}
-            <a class="nav-card nav-card--next" href="{{ linkify(next_item.url) }}">
+          {% if next_items and next_items|length > 0 %}
+            <a class="nav-card nav-card--next" href="{{ linkify(next_items[0].url) }}">
               <span class="nav-card__label">下一篇 →</span>
-              <span class="nav-card__title">{{ next_item.title }}</span>
+              <span class="nav-card__title">{{ next_items[0].title }}</span>
             </a>
           {% endif %}
         </nav>

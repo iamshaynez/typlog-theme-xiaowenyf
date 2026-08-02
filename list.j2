@@ -2,9 +2,7 @@
 
 {% block title %}{{ page.title }} · {{ site.name }}{% endblock %}
 
-{% if page.type == 'tag' and page.topic and page.topic.lang %}
-{% block lang %}{{ page.topic.lang }}{% endblock %}
-{% endif %}
+{% block lang %}{{ page.topic.lang if page.type == 'tag' and page.topic and page.topic.lang else (site.primary_lang or '') }}{% endblock %}
 
 {% block style %}
   {% include "./_partials/styles.j2" %}

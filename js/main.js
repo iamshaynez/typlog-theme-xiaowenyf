@@ -129,10 +129,11 @@
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
-  /* ---------- 移动导航 ---------- */
+  /* ---------- 导航（汉堡 / 多菜单面板） ---------- */
   function bindNav() {
     const toggle = qs(".nav-toggle");
     const nav = qs(".site-nav");
+    const header = qs(".site-header");
     if (!toggle || !nav) return;
 
     let backdrop = qs(".nav-backdrop");
@@ -144,8 +145,10 @@
 
     function setOpen(open) {
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
+      toggle.setAttribute("aria-label", open ? "关闭菜单" : "打开菜单");
       nav.classList.toggle("is-open", open);
       backdrop.classList.toggle("is-open", open);
+      if (header) header.classList.toggle("is-nav-open", open);
       document.body.style.overflow = open ? "hidden" : "";
     }
 
@@ -157,13 +160,27 @@
 
     backdrop.addEventListener("click", () => setOpen(false));
 
-    qsa("a", nav).forEach((a) => {
-      a.addEventListener("click", () => setOpen(false));
+    qsa("a, button", nav).forEach((el) => {
+      el.addEventListener("click", () => setOpen(false));
     });
 
     window.addEventListener("keydown", (e) => {
       if (e.key === "Escape") setOpen(false);
     });
+
+    // 旋转/拉宽时若不再需要面板态，收起
+    window.addEventListener(
+      "resize",
+      () => {
+        if (toggle.getAttribute("aria-expanded") === "true") {
+          // 保持打开也可；窄↔宽时重置避免错位
+          if (window.innerWidth !== bindNav._w) setOpen(false);
+        }
+        bindNav._w = window.innerWidth;
+      },
+      { passive: true }
+    );
+    bindNav._w = window.innerWidth;
   }
 
   /* ---------- 阅读进度 ---------- */

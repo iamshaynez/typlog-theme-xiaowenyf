@@ -1,6 +1,12 @@
 {# 注意：serve-theme 只内联一层 include，此文件内不能再 include #}
+{% set primary = site.primary_links or [] %}
+{% set secondary = site.secondary_links or [] %}
+{% set nav_count = (primary|length) + (secondary|length) + (1 if features.algolia else 0) %}
+{# 项数 ≥7 时桌面也走面板菜单，避免 10 条横排挤爆 #}
+{% set use_panel_nav = nav_count >= 7 %}
+
 <div class="reading-progress" aria-hidden="true"></div>
-<header class="site-header">
+<header class="site-header{% if use_panel_nav %} site-header--panel{% endif %}">
   <div class="site-header__inner">
     <a class="site-brand" href="{{ linkify('/') }}" aria-label="{{ site.name }}">
       <span class="site-brand__mark" aria-hidden="true">{{ brand_mark }}</span>
@@ -8,40 +14,38 @@
     </a>
 
     <button class="nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle__label" aria-hidden="true">菜单</span>
       <span class="nav-toggle__bars" aria-hidden="true">
         <span></span><span></span><span></span>
       </span>
     </button>
 
     <nav class="site-nav" id="site-nav" aria-label="主导航">
+      <div class="site-nav__panel-head">
+        <span class="section-index">目录</span>
+        <span class="site-nav__panel-meta">{{ nav_count }} 项</span>
+      </div>
       <ul class="site-nav__list">
-        <li>
-          <a class="site-nav__link" href="{{ linkify('/') }}">首页</a>
-        </li>
-        {% if site.primary_links %}
-          {% for link in site.primary_links %}
-            <li>
-              <a class="site-nav__link" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
-                {{ link.title }}
-              </a>
-            </li>
-          {% endfor %}
-        {% else %}
-          {% if archive_url %}
-            <li>
-              <a class="site-nav__link" href="{{ linkify(archive_url) }}">文章</a>
-            </li>
-          {% endif %}
+        {# 有主站链接时不再硬塞「首页」，避免与 Home 重复 #}
+        {% if not primary %}
+          <li>
+            <a class="site-nav__link" href="{{ linkify('/') }}">首页</a>
+          </li>
         {% endif %}
-        {% if site.secondary_links %}
-          {% for link in site.secondary_links %}
-            <li>
-              <a class="site-nav__link" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
-                {{ link.title }}
-              </a>
-            </li>
-          {% endfor %}
-        {% endif %}
+        {% for link in primary %}
+          <li>
+            <a class="site-nav__link" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ link.title }}
+            </a>
+          </li>
+        {% endfor %}
+        {% for link in secondary %}
+          <li>
+            <a class="site-nav__link site-nav__link--secondary" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
+              {{ link.title }}
+            </a>
+          </li>
+        {% endfor %}
         {% if features.algolia %}
           <li>
             <button type="button" class="site-nav__link js-search" aria-label="搜索">搜索</button>
