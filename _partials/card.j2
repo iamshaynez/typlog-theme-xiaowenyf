@@ -1,0 +1,86 @@
+{#
+  单卡 partial（供 serve-theme 一层 include 内联）
+  调用前设置：
+    card_post  - 文章对象
+    card_style - featured | plain | list
+    card_index - 编号（可选，可为 none）
+#}
+{% if card_style == 'list' %}
+<article class="post-card post-card--list">
+  {% if card_index is not none %}
+    <div class="post-card__index" aria-hidden="true">{{ '%02d'|format(card_index) }}</div>
+  {% endif %}
+  <div class="post-card__body">
+    {% if card_post.tags and card_post.tags|length > 0 %}
+      <div class="post-card__cat">{{ card_post.tags[0].title }}</div>
+    {% elif card_post.type %}
+      <div class="post-card__cat">{{ '播客' if card_post.type == 'audio' else '文章' }}</div>
+    {% endif %}
+    <h3 class="post-card__title">
+      <a class="post-card__title-link" href="{{ linkify(card_post.url) }}">{{ card_post.title }}</a>
+    </h3>
+    {% if card_post.subtitle %}
+      <p class="post-card__excerpt">{{ card_post.subtitle }}</p>
+    {% endif %}
+    <div class="post-card__meta">
+      {% if card_post.published_at %}
+        <time datetime="{{ card_post.published_at|xmldatetime }}">{{ card_post.published_at.strftime('%Y.%m.%d') }}</time>
+      {% endif %}
+    </div>
+  </div>
+</article>
+
+{% elif card_style == 'featured' %}
+<article class="post-card post-card--featured">
+  {% if card_index is not none %}
+    <div class="post-card__index" aria-hidden="true">{{ '%02d'|format(card_index) }}</div>
+  {% endif %}
+  <div class="post-card__body">
+    {% if card_post.tags and card_post.tags|length > 0 %}
+      <div class="post-card__cat">{{ card_post.tags[0].title }}</div>
+    {% else %}
+      <div class="post-card__cat">特稿</div>
+    {% endif %}
+    <h2 class="post-card__title">
+      <a class="post-card__title-link" href="{{ linkify(card_post.url) }}">{{ card_post.title }}</a>
+    </h2>
+    {% if card_post.subtitle %}
+      <p class="post-card__excerpt">{{ card_post.subtitle }}</p>
+    {% endif %}
+    <div class="post-card__meta">
+      {% if card_post.published_at %}
+        <time datetime="{{ card_post.published_at|xmldatetime }}">{{ card_post.published_at.strftime('%Y.%m.%d') }}</time>
+      {% endif %}
+    </div>
+  </div>
+</article>
+
+{% else %}
+<article class="post-card post-card--plain">
+  {% if card_post.cover and card_post.cover.src %}
+    <a class="post-card__media" href="{{ linkify(card_post.url) }}" tabindex="-1" aria-hidden="true">
+      <img src="{{ card_post.cover.src|thumbnail('m') }}" alt="" loading="lazy">
+    </a>
+  {% endif %}
+  <div class="post-card__body">
+    {% if card_post.tags and card_post.tags|length > 0 %}
+      <div class="post-card__cat">{{ card_post.tags[0].title }}</div>
+    {% endif %}
+    <h3 class="post-card__title">
+      <a class="post-card__title-link" href="{{ linkify(card_post.url) }}">{{ card_post.title }}</a>
+    </h3>
+    {% if card_post.subtitle %}
+      <p class="post-card__excerpt">{{ card_post.subtitle }}</p>
+    {% endif %}
+    <div class="post-card__meta">
+      {% if card_post.published_at %}
+        <time datetime="{{ card_post.published_at|xmldatetime }}">{{ card_post.published_at.strftime('%Y.%m.%d') }}</time>
+      {% endif %}
+      {% if card_post.tags and card_post.tags|length > 0 %}
+        <span class="dot" aria-hidden="true"></span>
+        <span>{{ card_post.tags[0].title }}</span>
+      {% endif %}
+    </div>
+  </div>
+</article>
+{% endif %}

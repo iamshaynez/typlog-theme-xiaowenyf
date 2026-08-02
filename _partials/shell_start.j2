@@ -1,4 +1,54 @@
-{% include "./_partials/config.j2" %}
+{# 注意：serve-theme 只内联一层 include，此文件内不能再 include #}
 <div class="reading-progress" aria-hidden="true"></div>
-{% include "./_partials/header.j2" %}
+<header class="site-header">
+  <div class="site-header__inner">
+    <a class="site-brand" href="{{ linkify('/') }}" aria-label="{{ site.name }}">
+      <span class="site-brand__mark" aria-hidden="true">{{ brand_mark }}</span>
+      <span class="site-brand__text">{{ site.name }}</span>
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="site-nav">
+      <span class="nav-toggle__bars" aria-hidden="true">
+        <span></span><span></span><span></span>
+      </span>
+    </button>
+
+    <nav class="site-nav" id="site-nav" aria-label="主导航">
+      <ul class="site-nav__list">
+        <li>
+          <a class="site-nav__link" href="{{ linkify('/') }}">首页</a>
+        </li>
+        {% if site.primary_links %}
+          {% for link in site.primary_links %}
+            <li>
+              <a class="site-nav__link" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                {{ link.title }}
+              </a>
+            </li>
+          {% endfor %}
+        {% else %}
+          {% if archive_url %}
+            <li>
+              <a class="site-nav__link" href="{{ linkify(archive_url) }}">文章</a>
+            </li>
+          {% endif %}
+        {% endif %}
+        {% if site.secondary_links %}
+          {% for link in site.secondary_links %}
+            <li>
+              <a class="site-nav__link" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                {{ link.title }}
+              </a>
+            </li>
+          {% endfor %}
+        {% endif %}
+        {% if features.algolia %}
+          <li>
+            <button type="button" class="site-nav__link js-search" aria-label="搜索">搜索</button>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+</header>
 <main class="site-main" id="main">

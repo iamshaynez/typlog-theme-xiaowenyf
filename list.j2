@@ -1,4 +1,3 @@
-{% from "_partials/cards.j2" import render_post_card %}
 {% include "./_partials/config.j2" %}
 
 {% block title %}{{ page.title }} · {{ site.name }}{% endblock %}
@@ -69,13 +68,19 @@
       {% if page.type in ('tag', 'author') %}
         <div class="post-list">
           {% for post in items %}
-            {{ render_post_card(post, 'list', loop.index) }}
+            {% set card_post = post %}
+            {% set card_style = 'list' %}
+            {% set card_index = loop.index %}
+            {% include "./_partials/card.j2" %}
           {% endfor %}
         </div>
       {% else %}
         <div class="post-grid post-grid--uniform">
           {% for post in items %}
-            {{ render_post_card(post, 'plain', loop.index) }}
+            {% set card_post = post %}
+            {% set card_style = 'plain' %}
+            {% set card_index = loop.index %}
+            {% include "./_partials/card.j2" %}
           {% endfor %}
         </div>
       {% endif %}
@@ -83,7 +88,6 @@
       <div class="empty-state">暂无内容</div>
     {% endif %}
 
-    {# 年份翻页 #}
     {% if page.prev_url or page.next_url %}
       <nav class="year-nav" aria-label="年份导航">
         {% if page.prev_url %}

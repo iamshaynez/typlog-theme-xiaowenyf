@@ -1,4 +1,3 @@
-{% from "_partials/cards.j2" import render_post_card %}
 {% include "./_partials/config.j2" %}
 
 {% block title %}{{ site.name }}{% if tagline %} · {{ tagline }}{% endif %}{% endblock %}
@@ -66,7 +65,10 @@
         <div class="post-grid">
           {% for post in posts %}
             {% if loop.index <= 6 %}
-              {{ render_post_card(post, 'featured' if loop.first else 'plain', loop.index) }}
+              {% set card_post = post %}
+              {% set card_style = 'featured' if loop.first else 'plain' %}
+              {% set card_index = loop.index %}
+              {% include "./_partials/card.j2" %}
             {% endif %}
           {% endfor %}
         </div>
@@ -93,7 +95,10 @@
         <div class="post-list">
           {% for post in posts %}
             {% if loop.index > 6 and loop.index <= 12 %}
-              {{ render_post_card(post, 'list', loop.index) }}
+              {% set card_post = post %}
+              {% set card_style = 'list' %}
+              {% set card_index = loop.index %}
+              {% include "./_partials/card.j2" %}
             {% endif %}
           {% endfor %}
         </div>

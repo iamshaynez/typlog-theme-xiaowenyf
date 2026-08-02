@@ -123,7 +123,6 @@
         </div>
       {% endif %}
 
-      {# 上一篇 / 下一篇 #}
       {% set prev_item = query.previous_subject(page) %}
       {% set next_item = query.next_subject(page) %}
       {% if prev_item or next_item %}
