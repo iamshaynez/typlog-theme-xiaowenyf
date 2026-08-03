@@ -129,12 +129,15 @@
     window.addEventListener("scroll", onScroll, { passive: true });
   }
 
-  /* ---------- 导航（汉堡 / 多菜单面板） ---------- */
+  /* ---------- 导航：汉堡（窄屏）+「更多」下拉（宽屏） ---------- */
   function bindNav() {
     const toggle = qs(".nav-toggle");
     const nav = qs(".site-nav");
     const header = qs(".site-header");
-    if (!toggle || !nav) return;
+    const more = qs(".site-nav__more");
+    const moreBtn = qs(".site-nav__more-btn");
+    const moreMenu = qs(".site-nav__dropdown");
+    if (!nav) return;
 
     let backdrop = qs(".nav-backdrop");
     if (!backdrop) {
@@ -143,38 +146,76 @@
       document.body.appendChild(backdrop);
     }
 
-    function setOpen(open) {
+    function setDrawerOpen(open) {
+      if (!toggle) return;
       toggle.setAttribute("aria-expanded", open ? "true" : "false");
       toggle.setAttribute("aria-label", open ? "关闭菜单" : "打开菜单");
       nav.classList.toggle("is-open", open);
       backdrop.classList.toggle("is-open", open);
       if (header) header.classList.toggle("is-nav-open", open);
       document.body.style.overflow = open ? "hidden" : "";
+      if (!open) setMoreOpen(false);
     }
 
-    toggle.addEventListener("click", (e) => {
-      spawnRipple(e, toggle);
-      const open = toggle.getAttribute("aria-expanded") !== "true";
-      setOpen(open);
-    });
+    function setMoreOpen(open) {
+      if (!more || !moreBtn || !moreMenu) return;
+      more.classList.toggle("is-open", open);
+      moreBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) moreMenu.removeAttribute("hidden");
+      else moreMenu.setAttribute("hidden", "");
+    }
 
-    backdrop.addEventListener("click", () => setOpen(false));
+    if (toggle) {
+      toggle.addEventListener("click", (e) => {
+        spawnRipple(e, toggle);
+        const open = toggle.getAttribute("aria-expanded") !== "true";
+        setDrawerOpen(open);
+      });
+    }
 
-    qsa("a, button", nav).forEach((el) => {
-      el.addEventListener("click", () => setOpen(false));
+    backdrop.addEventListener("click", () => setDrawerOpen(false));
+
+    if (moreBtn && moreMenu) {
+      moreBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        spawnRipple(e, moreBtn);
+        const open = moreBtn.getAttribute("aria-expanded") !== "true";
+        setMoreOpen(open);
+      });
+
+      // 点下拉内链接后关闭
+      qsa("a", moreMenu).forEach((a) => {
+        a.addEventListener("click", () => {
+          setMoreOpen(false);
+          setDrawerOpen(false);
+        });
+      });
+
+      // 点击外部关闭更多
+      document.addEventListener("click", (e) => {
+        if (!more.contains(e.target)) setMoreOpen(false);
+      });
+    }
+
+    // 窄屏抽屉：点链接/搜索关闭
+    qsa("a.site-nav__link, button.js-search", nav).forEach((el) => {
+      el.addEventListener("click", () => setDrawerOpen(false));
     });
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setMoreOpen(false);
+        setDrawerOpen(false);
+      }
     });
 
-    // 旋转/拉宽时若不再需要面板态，收起
     window.addEventListener(
       "resize",
       () => {
-        if (toggle.getAttribute("aria-expanded") === "true") {
-          // 保持打开也可；窄↔宽时重置避免错位
-          if (window.innerWidth !== bindNav._w) setOpen(false);
+        if (window.innerWidth !== bindNav._w) {
+          setMoreOpen(false);
+          setDrawerOpen(false);
         }
         bindNav._w = window.innerWidth;
       },
