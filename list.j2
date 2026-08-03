@@ -12,78 +12,155 @@
   {% include "./_partials/shell_start.j2" %}
 
   <div class="container">
-    <header class="page-header">
-      <div class="masthead-bar">
-        {% if page.type == 'tag' %}
-          <span><span class="masthead-bar__red">TAG</span></span>
-        {% elif page.type == 'author' %}
-          <span><span class="masthead-bar__red">AUTHOR</span></span>
-        {% elif page.type == 'audio_list' %}
-          <span><span class="masthead-bar__red">PODCAST</span></span>
-        {% else %}
-          <span><span class="masthead-bar__red">LIST</span></span>
-        {% endif %}
-        <span>
-          {% if page.type == 'tag' and page.topic %}
-            {{ page.topic.slug or 'tag' }}
-          {% elif page.type == 'author' and page.topic %}
-            {{ page.topic.username or 'author' }}
-          {% else %}
-            archive
-          {% endif %}
-        </span>
-        <span>{{ page.items|length if page.items else 0 }} 篇</span>
-      </div>
-
-      <h1 class="page-header__title display">{{ page.title }}</h1>
-
-      {% if page.topic and page.topic.summary %}
-        <p class="page-header__desc">{{ page.topic.summary }}</p>
-      {% elif page.topic and page.topic.bio %}
-        <div class="page-header__desc">{{ page.topic.bio|safe }}</div>
-      {% elif page.type == 'audio_list' and site.podcast %}
-        <p class="page-header__desc">{{ site.podcast.description or site.podcast.subtitle or '' }}</p>
-      {% endif %}
-
-      {% if page.type == 'tag' %}
-        <ul class="tag-list" style="margin-top: var(--space-5);">
-          {% for tag in query.tags() %}
-            <li>
-              <a class="tag{% if page.topic and tag.id == page.topic.id %} is-active{% endif %}"
-                 href="{{ linkify(tag.url) }}">{{ tag.title }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    </header>
-
     {% set items = page.items or [] %}
     {% if page.type == 'tag' and items %}
       {% set items = items|reverse %}
     {% endif %}
 
-    {% if items %}
-      {% if page.type in ('tag', 'author') %}
-        <div class="post-list">
+    {# —— 播客列表：杂志刊头 + 单集行卡（与文章列表解耦） —— #}
+    {% if page.type == 'audio_list' %}
+      <header class="podcast-show">
+        <div class="masthead-bar">
+          <span><span class="masthead-bar__red">PODCAST</span></span>
+          <span>episodes</span>
+          <span>{{ items|length }} 集</span>
+        </div>
+
+        <div class="podcast-show__layout">
+          {% if site.podcast and site.podcast.image %}
+            <div class="podcast-show__art" aria-hidden="true">
+              <img src="{{ site.podcast.image|thumbnail('m') }}" alt="">
+            </div>
+          {% endif %}
+
+          <div class="podcast-show__body">
+            <div class="podcast-show__eyebrow">
+              <span class="hero__eyebrow-line" aria-hidden="true"></span>
+              <span class="section-index">本期节目</span>
+            </div>
+            <h1 class="podcast-show__title display">
+              {{ (site.podcast.title if site.podcast and site.podcast.title else page.title) }}
+            </h1>
+            {% if site.podcast and site.podcast.subtitle and site.podcast.subtitle != page.title %}
+              <p class="podcast-show__subtitle">{{ site.podcast.subtitle }}</p>
+            {% endif %}
+            {% set show_desc = site.podcast.description if site.podcast else none %}
+            {% if show_desc %}
+              <p class="podcast-show__desc">{{ show_desc }}</p>
+            {% endif %}
+            <div class="podcast-show__meta meta">
+              {% if site.podcast and site.podcast.author %}
+                <span>{{ site.podcast.author }}</span>
+              {% endif %}
+              {% if items %}
+                {% if site.podcast and site.podcast.author %}<span class="dot" aria-hidden="true"></span>{% endif %}
+                <span>{{ items|length }} 集</span>
+              {% endif %}
+              {% if site.podcast and site.podcast.categories and site.podcast.categories|length > 0 %}
+                <span class="dot" aria-hidden="true"></span>
+                <span>{{ site.podcast.categories[0] if site.podcast.categories[0] is string else (site.podcast.categories[0].name if site.podcast.categories[0].name else site.podcast.categories[0]) }}</span>
+              {% endif %}
+            </div>
+            {% if site.podcast and site.podcast.links and site.podcast.links|length > 0 %}
+              <ul class="podcast-show__links">
+                {% for link in site.podcast.links %}
+                  <li>
+                    <a class="tag" href="{{ link.url }}"{% if link.blank %} target="_blank" rel="noopener"{% endif %}>
+                      {{ link.title }}
+                    </a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </header>
+
+      {% if items %}
+        <section class="ep-list" aria-label="节目列表">
+          <div class="section-head">
+            <div class="section-head__title">
+              <span class="section-index">EP</span>
+              <h2>节目单</h2>
+            </div>
+          </div>
           {% for post in items %}
             {% set card_post = post %}
-            {% set card_style = 'list' %}
+            {% set card_style = 'episode' %}
             {% set card_index = loop.index %}
             {% include "./_partials/card.j2" %}
           {% endfor %}
-        </div>
+        </section>
       {% else %}
-        <div class="post-grid post-grid--uniform">
-          {% for post in items %}
-            {% set card_post = post %}
-            {% set card_style = 'plain' %}
-            {% set card_index = loop.index %}
-            {% include "./_partials/card.j2" %}
-          {% endfor %}
-        </div>
+        <div class="empty-state">暂无节目</div>
       {% endif %}
+
     {% else %}
-      <div class="empty-state">暂无内容</div>
+      {# —— 文章 / 标签 / 作者 / 归档列表 —— #}
+      <header class="page-header">
+        <div class="masthead-bar">
+          {% if page.type == 'tag' %}
+            <span><span class="masthead-bar__red">TAG</span></span>
+          {% elif page.type == 'author' %}
+            <span><span class="masthead-bar__red">AUTHOR</span></span>
+          {% else %}
+            <span><span class="masthead-bar__red">LIST</span></span>
+          {% endif %}
+          <span>
+            {% if page.type == 'tag' and page.topic %}
+              {{ page.topic.slug or 'tag' }}
+            {% elif page.type == 'author' and page.topic %}
+              {{ page.topic.username or 'author' }}
+            {% else %}
+              archive
+            {% endif %}
+          </span>
+          <span>{{ items|length }} 篇</span>
+        </div>
+
+        <h1 class="page-header__title display">{{ page.title }}</h1>
+
+        {% if page.topic and page.topic.summary %}
+          <p class="page-header__desc">{{ page.topic.summary }}</p>
+        {% elif page.topic and page.topic.bio %}
+          <div class="page-header__desc">{{ page.topic.bio|safe }}</div>
+        {% endif %}
+
+        {% if page.type == 'tag' %}
+          <ul class="tag-list" style="margin-top: var(--space-5);">
+            {% for tag in query.tags() %}
+              <li>
+                <a class="tag{% if page.topic and tag.id == page.topic.id %} is-active{% endif %}"
+                   href="{{ linkify(tag.url) }}">{{ tag.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </header>
+
+      {% if items %}
+        {% if page.type in ('tag', 'author') %}
+          <div class="post-list">
+            {% for post in items %}
+              {% set card_post = post %}
+              {% set card_style = 'list' %}
+              {% set card_index = loop.index %}
+              {% include "./_partials/card.j2" %}
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="post-grid post-grid--uniform">
+            {% for post in items %}
+              {% set card_post = post %}
+              {% set card_style = 'plain' %}
+              {% set card_index = loop.index %}
+              {% include "./_partials/card.j2" %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="empty-state">暂无内容</div>
+      {% endif %}
     {% endif %}
 
     {% if page.prev_url or page.next_url %}

@@ -1,11 +1,75 @@
 {#
   单卡 partial（供 serve-theme 一层 include 内联）
   调用前设置：
-    card_post  - 文章对象
-    card_style - featured | plain | list
+    card_post  - 文章 / 播客对象
+    card_style - featured | plain | list | episode
     card_index - 编号（可选，可为 none）
 #}
-{% if card_style == 'list' %}
+{% if card_style == 'episode' %}
+{# 播客单集：方形封面 · 季集印章 · 时长 · 杂志行卡 #}
+{% set ep_img = (
+  card_post.cover.src if card_post.cover and card_post.cover.src
+  else (card_post.image if card_post.image
+  else (site.podcast.image if site.podcast and site.podcast.image else none))
+) %}
+<article class="ep-card{% if card_index == 1 %} ep-card--lead{% endif %}">
+  {% if card_index is not none %}
+    <div class="ep-card__index" aria-hidden="true">{{ '%02d'|format(card_index) }}</div>
+  {% endif %}
+
+  <div class="ep-card__art{% if not ep_img %} ep-card__art--empty{% endif %}" aria-hidden="true">
+    {% if ep_img %}
+      <img src="{{ ep_img|thumbnail('sm') }}" alt="" loading="lazy">
+    {% else %}
+      <span class="ep-card__play" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </span>
+    {% endif %}
+  </div>
+
+  <div class="ep-card__body">
+    <div class="ep-card__topline">
+      <div class="ep-card__badges">
+        {% if card_post.season or card_post.episode %}
+          <span class="ep-card__se">
+            {% if card_post.season %}S{{ '%02d'|format(card_post.season) }}{% endif %}{% if card_post.season and card_post.episode %} · {% endif %}{% if card_post.episode %}E{{ '%02d'|format(card_post.episode) }}{% endif %}
+          </span>
+        {% else %}
+          <span class="ep-card__se">播客</span>
+        {% endif %}
+        {% if card_post.explicit %}
+          <span class="ep-card__explicit">E</span>
+        {% endif %}
+      </div>
+      {% if card_post.duration %}
+        <span class="ep-card__duration">{{ card_post.duration }}</span>
+      {% endif %}
+    </div>
+
+    <h3 class="ep-card__title">
+      <a class="ep-card__title-link" href="{{ linkify(card_post.url) }}">{{ card_post.title }}</a>
+    </h3>
+
+    {% if card_post.subtitle %}
+      <p class="ep-card__excerpt">{{ card_post.subtitle }}</p>
+    {% endif %}
+
+    <div class="ep-card__meta">
+      {% if card_post.published_at %}
+        <time datetime="{{ card_post.published_at|xmldatetime }}">{{ card_post.published_at.strftime('%Y.%m.%d') }}</time>
+      {% endif %}
+      {% if card_post.hosts and card_post.hosts|length > 0 %}
+        <span class="dot" aria-hidden="true"></span>
+        <span>{{ card_post.hosts[0].name }}</span>
+      {% elif card_post.authors and card_post.authors|length > 0 %}
+        <span class="dot" aria-hidden="true"></span>
+        <span>{{ card_post.authors[0].name }}</span>
+      {% endif %}
+    </div>
+  </div>
+</article>
+
+{% elif card_style == 'list' %}
 <article class="post-card post-card--list">
   {% if card_index is not none %}
     <div class="post-card__index" aria-hidden="true">{{ '%02d'|format(card_index) }}</div>

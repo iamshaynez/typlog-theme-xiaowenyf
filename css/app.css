@@ -2731,7 +2731,7 @@ body.is-loaded .site-main {
   margin: 2.5em 0;
 }
 
-/* 播客音频 */
+/* 播客音频（单集详情） */
 .article__audio {
   margin-bottom: var(--space-6);
   padding: var(--space-5);
@@ -2743,6 +2743,466 @@ body.is-loaded .site-main {
 .article__audio audio {
   width: 100%;
   margin-top: var(--space-4);
+}
+
+/* ============================================================
+   播客列表 · 杂志节目单（与文章 post-list / post-grid 解耦）
+   ============================================================ */
+
+/* —— 节目刊头 —— */
+.podcast-show {
+  margin-bottom: var(--space-8);
+  padding-bottom: var(--space-7);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.podcast-show__layout {
+  display: grid;
+  grid-template-columns: minmax(8.5rem, 12rem) 1fr;
+  gap: var(--space-6) var(--space-7);
+  align-items: end;
+  margin-top: var(--space-6);
+}
+
+.podcast-show__art {
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--ink);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.podcast-show__art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px rgba(20, 18, 16, 0.08);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.podcast-show__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.podcast-show__body {
+  min-width: 0;
+}
+
+.podcast-show__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.podcast-show__title {
+  font-size: var(--fs-display);
+  line-height: 0.95;
+  margin-bottom: var(--space-4);
+  max-width: 14ch;
+}
+
+.podcast-show__subtitle {
+  font-family: var(--font-serif);
+  font-size: var(--fs-h3);
+  font-weight: var(--fw-bold);
+  color: var(--ink-2);
+  margin: 0 0 var(--space-3);
+  max-width: 28rem;
+}
+
+.podcast-show__desc {
+  max-width: 36rem;
+  color: var(--ink-2);
+  font-size: var(--fs-lead);
+  line-height: 1.65;
+  margin: 0 0 var(--space-5);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.podcast-show__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.podcast-show__meta .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ink-3);
+}
+
+.podcast-show__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* —— 节目单列表 —— */
+.ep-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ep-list > .section-head {
+  margin-bottom: var(--space-5);
+}
+
+/* —— 单集行卡 —— */
+.ep-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 3rem minmax(4.5rem, 5.5rem) 1fr;
+  gap: var(--space-4) var(--space-5);
+  align-items: start;
+  padding: var(--space-5) 0;
+  border-bottom: 1px solid var(--hairline);
+  transition: transform var(--dur-3) var(--ease-out);
+}
+
+.ep-card:first-of-type {
+  border-top: 1px solid var(--hairline);
+}
+
+/* 首集加码：玄黑底杂志大卡 */
+.ep-card--lead {
+  grid-template-columns: 3.5rem minmax(6rem, 8rem) 1fr;
+  gap: var(--space-5) var(--space-6);
+  margin-bottom: var(--space-4);
+  padding: var(--space-6);
+  background: var(--ink);
+  color: var(--cream);
+  border: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.ep-card--lead + .ep-card {
+  border-top: 0;
+}
+
+.ep-card__index {
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: var(--fw-bold);
+  color: var(--red);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  padding-top: 0.15em;
+}
+
+.ep-card--lead .ep-card__index {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  color: color-mix(in srgb, var(--red) 85%, transparent);
+}
+
+.ep-card__art {
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--hairline);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ep-card--lead .ep-card__art {
+  background: var(--ink-line);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28);
+}
+
+.ep-card__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--dur-4) var(--ease-out);
+}
+
+.ep-card:hover .ep-card__art img {
+  transform: scale(1.05);
+}
+
+.ep-card__art--empty {
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--ink) 8%, var(--paper));
+  color: var(--red);
+}
+
+.ep-card--lead .ep-card__art--empty {
+  background: var(--ink-line);
+  color: var(--cream);
+}
+
+.ep-card__play {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  opacity: 0.85;
+}
+
+.ep-card__play svg {
+  margin-left: 2px; /* 视觉居中播放三角 */
+}
+
+.ep-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  position: relative;
+  z-index: 1;
+}
+
+.ep-card__topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.ep-card__badges {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ep-card__se {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-wider);
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.ep-card--lead .ep-card__se {
+  color: color-mix(in srgb, var(--red) 90%, var(--cream));
+}
+
+.ep-card__explicit {
+  font-family: var(--font-sans);
+  font-size: 0.625rem;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  padding: 0.2rem 0.35rem;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--ink-3);
+  opacity: 0.85;
+}
+
+.ep-card--lead .ep-card__explicit {
+  color: var(--cream-3);
+}
+
+.ep-card__duration {
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-medium);
+  letter-spacing: var(--ls-wide);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--hairline);
+  border-radius: 100px;
+}
+
+.ep-card--lead .ep-card__duration {
+  color: var(--cream-2);
+  border-color: var(--ink-line);
+  background: color-mix(in srgb, var(--cream) 6%, transparent);
+}
+
+.ep-card__title {
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-bold);
+  line-height: var(--lh-snug);
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  max-width: 28ch;
+  margin: 0;
+}
+
+.ep-card--lead .ep-card__title {
+  font-size: clamp(1.375rem, 2.8vw, 1.875rem);
+  color: var(--cream);
+  max-width: 18ch;
+}
+
+/* 整卡可点：标题链接铺满 */
+.ep-card__title-link {
+  display: inline;
+  background-image: linear-gradient(currentColor, currentColor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1.5px;
+  transition: background-size var(--dur-3) var(--ease-out);
+}
+
+.ep-card__title-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.ep-card:hover .ep-card__title-link {
+  background-size: 100% 1.5px;
+}
+
+.ep-card--lead .ep-card__title-link {
+  background-image: linear-gradient(var(--red), var(--red));
+}
+
+.ep-card__excerpt {
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--ink-2);
+  margin: 0;
+  max-width: 40rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ep-card--lead .ep-card__excerpt {
+  color: var(--cream-3);
+  -webkit-line-clamp: 3;
+  max-width: 32rem;
+}
+
+.ep-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--ls-wide);
+  color: var(--ink-3);
+}
+
+.ep-card--lead .ep-card__meta {
+  color: var(--cream-3);
+}
+
+.ep-card__meta .dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.5;
+}
+
+.ep-card:hover {
+  transform: translateX(4px);
+}
+
+.ep-card--lead:hover {
+  transform: translateY(-3px);
+}
+
+.ep-card:active {
+  transform: translateX(2px) scale(0.995);
+}
+
+.ep-card--lead:active {
+  transform: translateY(-1px) scale(0.995);
+}
+
+/* 入场动画（section-head 在前，用 of-type 数 article） */
+.ep-list > .ep-card {
+  animation: fade-up var(--dur-4) var(--ease-out) both;
+}
+
+.ep-list > .ep-card:nth-of-type(1) { animation-delay: 40ms; }
+.ep-list > .ep-card:nth-of-type(2) { animation-delay: 90ms; }
+.ep-list > .ep-card:nth-of-type(3) { animation-delay: 140ms; }
+.ep-list > .ep-card:nth-of-type(4) { animation-delay: 190ms; }
+.ep-list > .ep-card:nth-of-type(5) { animation-delay: 240ms; }
+.ep-list > .ep-card:nth-of-type(6) { animation-delay: 290ms; }
+.ep-list > .ep-card:nth-of-type(7) { animation-delay: 340ms; }
+.ep-list > .ep-card:nth-of-type(8) { animation-delay: 390ms; }
+
+/* 响应式 · 平板 / 手机 */
+@media (max-width: 900px) {
+  .podcast-show__layout {
+    grid-template-columns: minmax(7rem, 9.5rem) 1fr;
+    gap: var(--space-5);
+  }
+
+  .podcast-show__title {
+    max-width: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .podcast-show {
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
+
+  .podcast-show__layout {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .podcast-show__art {
+    width: min(10rem, 42vw);
+  }
+
+  .ep-card,
+  .ep-card--lead {
+    grid-template-columns: 2.25rem minmax(3.75rem, 4.5rem) 1fr;
+    gap: var(--space-3) var(--space-4);
+    padding: var(--space-4) 0;
+  }
+
+  .ep-card--lead {
+    padding: var(--space-5);
+    margin-bottom: var(--space-3);
+  }
+
+  .ep-card__index {
+    font-size: 1.25rem;
+  }
+
+  .ep-card--lead .ep-card__index {
+    font-size: 1.75rem;
+  }
+
+  .ep-card__title,
+  .ep-card--lead .ep-card__title {
+    max-width: none;
+    font-size: var(--fs-h3);
+  }
+
+  .ep-card:hover,
+  .ep-card--lead:hover {
+    transform: none; /* 触屏避免误位移 */
+  }
 }
 
 /* ============================================================
