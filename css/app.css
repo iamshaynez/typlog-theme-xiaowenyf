@@ -1080,29 +1080,32 @@ button.site-nav__link {
   transform: scale(0.97);
 }
 
-/* —— 文章网格（杂志拼贴） —— */
+/* —— 文章网格（杂志拼贴） ——
+   桌面：首卡 7 列 + 侧卡 5 列；其余小卡统一 4 列（每行 3 张等宽）
+   不再让第 3 张占 5 列，避免「一行两张宽窄不一、右侧留白」 */
 .post-grid {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: var(--space-5) var(--space-5);
+  align-items: stretch;
 }
 
 .post-grid > .post-card:first-child {
   grid-column: span 7;
 }
 
-.post-grid > .post-card:nth-child(2),
-.post-grid > .post-card:nth-child(3) {
+.post-grid > .post-card:nth-child(2) {
   grid-column: span 5;
 }
 
-.post-grid > .post-card:nth-child(n+4) {
+.post-grid > .post-card:nth-child(n+3) {
   grid-column: span 4;
 }
 
 /* 列表页等宽网格 */
 .post-grid--uniform > .post-card {
   grid-column: span 4 !important;
+  grid-row: auto !important;
 }
 
 /* —— 文章页（与首页同宽：.container = --measure-wide） —— */
@@ -1293,10 +1296,10 @@ button.site-nav__link {
 @media (max-width: 900px) {
   .post-grid > .post-card:first-child,
   .post-grid > .post-card:nth-child(2),
-  .post-grid > .post-card:nth-child(3),
-  .post-grid > .post-card:nth-child(n+4),
+  .post-grid > .post-card:nth-child(n+3),
   .post-grid--uniform > .post-card {
     grid-column: span 6 !important;
+    grid-row: auto !important;
   }
 
   .site-footer__top {
@@ -1493,10 +1496,10 @@ button.site-nav__link {
 
   .post-grid > .post-card:first-child,
   .post-grid > .post-card:nth-child(2),
-  .post-grid > .post-card:nth-child(3),
-  .post-grid > .post-card:nth-child(n+4),
+  .post-grid > .post-card:nth-child(n+3),
   .post-grid--uniform > .post-card {
     grid-column: span 12 !important;
+    grid-row: auto !important;
   }
 
   .article__header {
@@ -1693,7 +1696,8 @@ button.site-nav__link {
   background: var(--ink);
   color: var(--cream);
   padding: var(--space-6);
-  min-height: clamp(16rem, 52vw, 22rem);
+  min-height: clamp(16rem, 42vw, 20rem);
+  height: 100%;
   justify-content: flex-end;
   overflow: hidden;
 }
@@ -1730,7 +1734,8 @@ button.site-nav__link {
 .post-card--featured .post-card__title {
   color: var(--cream);
   font-size: clamp(1.5rem, 3vw, 2.125rem);
-  max-width: min(14ch, 100%);
+  /* 长中文标题：比 14ch 更宽，仍保留杂志短栏感 */
+  max-width: min(22ch, 100%);
 }
 
 .post-card--featured .post-card__excerpt {
@@ -1749,11 +1754,24 @@ button.site-nav__link {
 .post-card--plain {
   padding: var(--space-5) 0;
   border-top: 1px solid var(--hairline);
+  min-width: 0; /* 允许网格内长标题正常折行，避免撑破列宽 */
 }
 
-.post-card--plain:first-child,
-.post-grid > .post-card--plain:nth-child(n) {
-  /* grid children keep top border as divider */
+/* 网格内右侧叠卡 / 三列小卡：去掉顶线，用间距呼吸 */
+.post-grid > .post-card--plain {
+  border-top: 0;
+  padding-top: 0;
+  height: 100%;
+}
+
+.post-grid > .post-card--plain .post-card__body {
+  min-width: 0;
+}
+
+.post-grid > .post-card--plain .post-card__title {
+  /* 小卡标题用满列宽，不再人为收窄 */
+  max-width: none;
+  text-wrap: pretty;
 }
 
 .post-card__media {
@@ -1852,10 +1870,10 @@ button.site-nav__link {
   opacity: 0.5;
 }
 
-/* 封面式列表卡（带左边红线） */
+/* 封面式列表卡（序号 + 正文，标题用满行宽） */
 .post-card--list {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: var(--space-5);
   padding: var(--space-5) 0;
   border-bottom: 1px solid var(--hairline);
@@ -1870,11 +1888,24 @@ button.site-nav__link {
   line-height: 1;
   min-width: 2.5rem;
   letter-spacing: -0.02em;
+  padding-top: 0.15em; /* 与标题第一行视觉对齐 */
+}
+
+.post-card--list .post-card__body {
+  min-width: 0;
+  max-width: none;
 }
 
 .post-card--list .post-card__title {
-  font-size: var(--fs-h2);
-  max-width: 20ch;
+  font-size: clamp(1.15rem, 1.6vw, 1.5rem);
+  line-height: var(--lh-snug);
+  /* 长标题吃满列表栏，不再 20ch 提前断行 */
+  max-width: none;
+  text-wrap: pretty;
+}
+
+.post-card--list .post-card__excerpt {
+  max-width: 48rem; /* 摘要略收，标题仍全宽 */
 }
 
 .post-card--list:hover {
@@ -2253,12 +2284,18 @@ button.site-nav__link {
   }
 
   .post-card--list {
-    gap: var(--space-4);
+    gap: var(--space-3) var(--space-4);
     padding: var(--space-4) 0;
   }
 
   .post-card--list .post-card__title {
     max-width: none;
+    font-size: 1.125rem;
+  }
+
+  .post-card--list .post-card__index {
+    font-size: 1.35rem;
+    min-width: 2rem;
   }
 
   .post-card--list:hover {

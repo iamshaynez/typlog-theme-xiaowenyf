@@ -14,7 +14,8 @@
   <div class="container">
     {% set items = page.items or [] %}
     {% if page.type == 'tag' and items %}
-      {% set items = items|reverse %}
+      {# reverse 返回 iterator，必须再 |list，否则 items|length 会报错 #}
+      {% set items = items|reverse|list %}
     {% endif %}
 
     {# —— 播客列表：杂志刊头 + 单集行卡（与文章列表解耦） —— #}
