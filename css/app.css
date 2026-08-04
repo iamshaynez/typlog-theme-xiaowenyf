@@ -2331,9 +2331,10 @@ button.site-nav__link {
    全站点击反馈 · 入场 · 涟漪 · 页面过渡
    ============================================================ */
 
-/* —— 涟漪容器（JS 注入 .ripple-ink） —— */
+/* —— 涟漪容器（JS 注入 .ripple-ink） ——
+   不在此强制 position:relative，避免覆盖 fixed/absolute（如 Typlog .overlay_close）
+   static 元素的定位由 js/main.js ensureRippleHost 按需处理 */
 .ripple-host {
-  position: relative;
   overflow: hidden;
 }
 

@@ -97,9 +97,17 @@
     setTimeout(() => ink.remove(), 700);
   }
 
+  function shouldSkipRipple(el) {
+    // Typlog 平台浮层（订阅 / 搜索 / 二维码等）：勿改定位与 overflow
+    if (el.closest(".overlay")) return true;
+    if (el.classList.contains("overlay_close")) return true;
+    return false;
+  }
+
   function bindRipples(root) {
     qsa(RIPPLE_SELECTOR, root).forEach((el) => {
       if (el.dataset.rippleBound) return;
+      if (shouldSkipRipple(el)) return;
       el.dataset.rippleBound = "1";
       el.addEventListener(
         "pointerdown",
@@ -304,12 +312,37 @@
       if (e.key !== "Enter" && e.key !== " ") return;
       const el = document.activeElement;
       if (!el || !el.matches) return;
+      if (shouldSkipRipple(el)) return;
       if (el.matches(RIPPLE_SELECTOR)) {
         const rect = el.getBoundingClientRect();
         spawnRipple(
           { clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2, button: 0 },
           el
         );
+      }
+    });
+  }
+
+  /* ---------- Typlog 浮层：ESC 关闭 ---------- */
+  function hideActiveOverlay() {
+    const overlay = qs(".overlay.active");
+    if (!overlay) return false;
+    const closeBtn = qs(".overlay_close", overlay);
+    if (closeBtn) {
+      closeBtn.click();
+    } else {
+      overlay.classList.remove("active");
+      document.body.classList.remove("overlay-active");
+    }
+    return true;
+  }
+
+  function bindOverlayDismiss() {
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (e.defaultPrevented) return;
+      if (hideActiveOverlay()) {
+        e.preventDefault();
       }
     });
   }
@@ -325,6 +358,7 @@
     bindReveal();
     bindExternalLinks();
     bindKeyboardRipple();
+    bindOverlayDismiss();
 
     // 动态内容兜底
     if ("MutationObserver" in window) {

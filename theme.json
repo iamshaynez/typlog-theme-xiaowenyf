@@ -4,7 +4,7 @@
   "name#ja": "玄墨",
   "author": "xiaowenz",
   "repo": "iamshaynez/typlog-theme-xiaowenyf",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "玄墨 · 中文杂志感 Typlog 主题。冷灰底、玄黑字、冷漆红点睛，优雅反差与全站点击动效。",
   "templates": [
     "home.j2",
